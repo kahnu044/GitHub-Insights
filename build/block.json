@@ -6,7 +6,7 @@
   "title": "Github Insights",
   "category": "widgets",
   "icon": "smiley",
-  "description": "Example block scaffolded with Create Block tool.",
+  "description": "Providing a streamlined way to showcase detailed statistics and insights for your GitHub repositories.",
   "example": {},
   "supports": {
     "html": false
