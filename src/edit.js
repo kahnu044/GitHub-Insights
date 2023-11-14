@@ -22,11 +22,12 @@ export default function Edit({ attributes, setAttributes }) {
 	const [isValidGithubRepoUrl, setIsValidGithubRepoUrl] = useState(true);
 	const [githubRepoErrorMessage, setGithubRepoErrorMessage] = useState('');
 	const [matchedInfoValues, setMatchedInfoValues] = useState([]);
+	const [repoSuggestionField, setRepoSuggestionField] = useState(attributes.githubRepoSuggestionsField || []);
 
 	const handleRepoListValue = (selectedListValues) => {
 
-		// Check if every selected value is present in the repoInfoField array
-		const isValidSelection = selectedListValues.every(value => repoInfoField.includes(value));
+		// Check if every selected value is present in the repoSuggestionField array
+		const isValidSelection = selectedListValues.every(value => repoSuggestionField.includes(value));
 		setErrorMessage('');
 		if (!isValidSelection) {
 			setErrorMessage('Invalid entry. Please select a valid info name.');
@@ -82,13 +83,15 @@ export default function Edit({ attributes, setAttributes }) {
 			// Remove the owner key from the object
 			delete modifiedRepoInfo.owner;
 
-			console.log('Update repository information', modifiedRepoInfo)
+			// Set the suggestion key name
+			setRepoSuggestionField(Object.keys(modifiedRepoInfo));
 
 			setAttributes(
 				{
 					githubRepoUrl: url,
 					isValidGithubUrl: isValidGithubRepoUrl,
-					githubRepoResponseInfo: JSON.stringify(modifiedRepoInfo)
+					githubRepoResponseInfo: JSON.stringify(modifiedRepoInfo),
+					githubRepoSuggestionsField: Object.keys(modifiedRepoInfo)
 				});
 
 		} catch (error) {
@@ -131,7 +134,7 @@ export default function Edit({ attributes, setAttributes }) {
 					<FormTokenField
 						label="Select Info Fields"
 						value={repoInfoLists}
-						suggestions={repoInfoField}
+						suggestions={repoSuggestionField}
 						onChange={(listValues) => handleRepoListValue(listValues)}
 						placeholder="Select Fields Name"
 					/>
