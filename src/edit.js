@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useBlockProps, RichText, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, FormTokenField, TextControl } from '@wordpress/components';
 
@@ -14,13 +14,15 @@ const repoInfoField = [
 	'url',
 ];
 
-export default function Edit() {
+export default function Edit({ attributes, setAttributes }) {
 
-	const [repoInfoLists, setRepoInfoLists] = useState([]);
+	const [repoInfoLists, setRepoInfoLists] = useState(attributes.selectedInfoNames || []);
 	const [errorMessage, setErrorMessage] = useState('');
-	const [githubRepoUrl, setGithubRepoUrl] = useState('');
+	const [githubRepoUrl, setGithubRepoUrl] = useState(attributes.githubRepoUrl || '');
 	const [isValidGithubRepoUrl, setIsValidGithubRepoUrl] = useState(true);
 	const [githubRepoErrorMessage, setGithubRepoErrorMessage] = useState('');
+	const [matchedInfoValues, setMatchedInfoValues] = useState([]);
+
 	const handleRepoListValue = (selectedListValues) => {
 
 		// Check if every selected value is present in the repoInfoField array
@@ -31,6 +33,7 @@ export default function Edit() {
 			return;
 		}
 		setRepoInfoLists(selectedListValues);
+		setAttributes({ selectedInfoNames: selectedListValues });
 	}
 
 	// Check the github URL format and validate with github
@@ -61,11 +64,36 @@ export default function Edit() {
 				}
 				return;
 			}
+
+			const repoInfo = await response.json();
+			setAttributes(
+				{
+					githubRepoUrl: url,
+					isValidGithubUrl: isValidGithubRepoUrl,
+					githubRepoResponseInfo: JSON.stringify(repoInfo)
+				});
+
 		} catch (error) {
 			setIsValidGithubRepoUrl(false);
 			setGithubRepoErrorMessage('Error validating GitHub URL')
 		}
 	};
+
+	const matchValuesWithPreferences = () => {
+		const { githubRepoResponseInfo } = attributes;
+		if (githubRepoResponseInfo) {
+			const repoInfo = JSON.parse(githubRepoResponseInfo);
+			const matched = repoInfoLists.map((key) => ({
+				key,
+				value: repoInfo[key],
+			}));
+			setMatchedInfoValues(matched);
+		}
+	};
+
+	useEffect(() => {
+		matchValuesWithPreferences();
+	}, [repoInfoLists, attributes.githubRepoResponseInfo]);
 
 	return (
 		<div {...useBlockProps()}>
@@ -94,13 +122,11 @@ export default function Edit() {
 					)}
 				</PanelBody>
 			</InspectorControls>
-			<RichText
-				tagName="p"
-				// value={attributes.heading}
-				// allowedFormats={['core/bold', 'core/italic']}
-				// onChange={(heading) => setAttributes({ heading })}
-				placeholder="Enter heading here..."
-			/>
+			{matchedInfoValues && matchedInfoValues.map(({ key, value }) => (
+				<>
+					<RichText key={key} tagName="p" value={`${key} : ${value}`} />
+				</>
+			))}
 		</div>
 	);
 }
