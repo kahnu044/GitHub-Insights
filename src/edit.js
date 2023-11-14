@@ -2,17 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from 'react';
 import { useBlockProps, RichText, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, FormTokenField, TextControl } from '@wordpress/components';
-
 import './editor.scss';
-
-const repoInfoField = [
-	'name',
-	'watchers_count',
-	'language',
-	'forks',
-	'html_url',
-	'url',
-];
 
 export default function Edit({ attributes, setAttributes }) {
 
@@ -143,11 +133,20 @@ export default function Edit({ attributes, setAttributes }) {
 					)}
 				</PanelBody>
 			</InspectorControls>
-			{matchedInfoValues && matchedInfoValues.map(({ key, value }) => (
-				<>
-					<RichText key={key} tagName="p" value={`${key} : ${value}`} />
-				</>
-			))}
+
+			{matchedInfoValues && (
+				<div style={{ padding: "10px" }}>
+					<RichText
+						tagName="h4"
+						value={attributes.sectionHeading}
+						style={{ margin: 0 }}
+						onChange={(newValue) => setAttributes({ sectionHeading: newValue })}
+					/>
+					{matchedInfoValues.map(({ key, value }) => (
+						<RichText key={key} tagName="p" value={`${key} : ${value}`} />
+					))}
+				</div>
+			)}
 		</div>
 	);
 }

@@ -31,7 +31,11 @@
     "selectedInfoNames": {
       "type": "array",
       "default": []
-    }
+    },
+	"sectionHeading": {
+		"type": "string",
+		"default": "GitHub Insights"
+	  }
   },
   "textdomain": "github-insights",
   "editorScript": "file:./index.js",
