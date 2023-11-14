@@ -18,15 +18,123 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./editor.scss */ "./src/editor.scss");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./editor.scss */ "./src/editor.scss");
 
 
 
 
-function Edit() {
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
+
+
+const repoInfoField = ['name', 'watchers_count', 'language', 'forks', 'html_url', 'url'];
+function Edit({
+  attributes,
+  setAttributes
+}) {
+  const [repoInfoLists, setRepoInfoLists] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(attributes.selectedInfoNames || []);
+  const [errorMessage, setErrorMessage] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('');
+  const [githubRepoUrl, setGithubRepoUrl] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(attributes.githubRepoUrl || '');
+  const [isValidGithubRepoUrl, setIsValidGithubRepoUrl] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
+  const [githubRepoErrorMessage, setGithubRepoErrorMessage] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('');
+  const [matchedInfoValues, setMatchedInfoValues] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]);
+  const handleRepoListValue = selectedListValues => {
+    // Check if every selected value is present in the repoInfoField array
+    const isValidSelection = selectedListValues.every(value => repoInfoField.includes(value));
+    setErrorMessage('');
+    if (!isValidSelection) {
+      setErrorMessage('Invalid entry. Please select a valid info name.');
+      return;
+    }
+    setRepoInfoLists(selectedListValues);
+    setAttributes({
+      selectedInfoNames: selectedListValues
+    });
+  };
+
+  // Check the github URL format and validate with github
+  const validateGithubRepoUrl = async url => {
+    setGithubRepoErrorMessage('');
+    const githubUrlPattern = /^https:\/\/github\.com\/[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
+    const isValidUrl = githubUrlPattern.test(url);
+    if (!isValidUrl) {
+      setIsValidGithubRepoUrl(false);
+      setGithubRepoErrorMessage('Invalid GitHub URL');
+      return;
+    }
+    setIsValidGithubRepoUrl(true);
+    try {
+      const response = await fetch(`https://api.github.com/repos${new URL(url).pathname}`);
+      if (!response.ok) {
+        setIsValidGithubRepoUrl(false);
+
+        // Repository does not exist or private
+        if (response.status === 404) {
+          setGithubRepoErrorMessage('Repository not found.');
+        } else {
+          setGithubRepoErrorMessage('An error occurred while fetching repository information.');
+        }
+        return;
+      }
+      const repoInfo = await response.json();
+      setAttributes({
+        githubRepoUrl: url,
+        isValidGithubUrl: isValidGithubRepoUrl,
+        githubRepoResponseInfo: JSON.stringify(repoInfo)
+      });
+    } catch (error) {
+      setIsValidGithubRepoUrl(false);
+      setGithubRepoErrorMessage('Error validating GitHub URL');
+    }
+  };
+  const matchValuesWithPreferences = () => {
+    const {
+      githubRepoResponseInfo
+    } = attributes;
+    if (githubRepoResponseInfo) {
+      const repoInfo = JSON.parse(githubRepoResponseInfo);
+      const matched = repoInfoLists.map(key => ({
+        key,
+        value: repoInfo[key]
+      }));
+      setMatchedInfoValues(matched);
+    }
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    matchValuesWithPreferences();
+  }, [repoInfoLists, attributes.githubRepoResponseInfo]);
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     ...(0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.useBlockProps)()
-  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Github Insights – Hello! from github insights', 'github-insights'));
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.InspectorControls, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.PanelBody, {
+    title: "GitHub Repo Settings"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.TextControl, {
+    label: "Enter GitHub Repo URL",
+    value: githubRepoUrl,
+    onChange: value => setGithubRepoUrl(value),
+    onBlur: () => validateGithubRepoUrl(githubRepoUrl)
+  }), !isValidGithubRepoUrl && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
+    style: {
+      color: 'red'
+    }
+  }, githubRepoErrorMessage), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.FormTokenField, {
+    label: "Select Info Fields",
+    value: repoInfoLists,
+    suggestions: repoInfoField,
+    onChange: listValues => handleRepoListValue(listValues),
+    placeholder: "Select Fields Name"
+  }), errorMessage && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
+    style: {
+      color: 'red',
+      marginTop: '5px'
+    }
+  }, errorMessage))), matchedInfoValues && matchedInfoValues.map(({
+    key,
+    value
+  }) => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
+    key: key,
+    tagName: "p",
+    value: `${key} : ${value}`
+  }))));
 }
 
 /***/ }),
@@ -179,6 +287,16 @@ module.exports = window["wp"]["blocks"];
 
 /***/ }),
 
+/***/ "@wordpress/components":
+/*!************************************!*\
+  !*** external ["wp","components"] ***!
+  \************************************/
+/***/ ((module) => {
+
+module.exports = window["wp"]["components"];
+
+/***/ }),
+
 /***/ "@wordpress/i18n":
 /*!******************************!*\
   !*** external ["wp","i18n"] ***!
@@ -195,7 +313,7 @@ module.exports = window["wp"]["i18n"];
   \************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/github-insights","version":"0.1.0","title":"Github Insights","category":"widgets","icon":"smiley","description":"Providing a streamlined way to showcase detailed statistics and insights for your GitHub repositories.","example":{},"supports":{"html":false},"textdomain":"github-insights","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/github-insights","version":"0.1.0","title":"Github Insights","category":"widgets","icon":"smiley","description":"Providing a streamlined way to showcase detailed statistics and insights for your GitHub repositories.","example":{},"supports":{"html":false},"attributes":{"githubRepoUrl":{"type":"string","default":""},"isValidGithubUrl":{"type":"boolean","default":true},"githubRepoResponseInfo":{"type":"string","default":"{}"},"selectedInfoNames":{"type":"array","default":["name"]}},"textdomain":"github-insights","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
 
 /***/ })
 

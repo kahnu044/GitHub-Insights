@@ -1,19 +1,37 @@
 {
-	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 3,
-	"name": "create-block/github-insights",
-	"version": "0.1.0",
-	"title": "Github Insights",
-	"category": "widgets",
-	"icon": "smiley",
-	"description": "Providing a streamlined way to showcase detailed statistics and insights for your GitHub repositories.",
-	"example": {},
-	"supports": {
-		"html": false
-	},
-	"textdomain": "github-insights",
-	"editorScript": "file:./index.js",
-	"editorStyle": "file:./index.css",
-	"style": "file:./style-index.css",
-	"viewScript": "file:./view.js"
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "create-block/github-insights",
+  "version": "0.1.0",
+  "title": "Github Insights",
+  "category": "widgets",
+  "icon": "smiley",
+  "description": "Providing a streamlined way to showcase detailed statistics and insights for your GitHub repositories.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "githubRepoUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "isValidGithubUrl": {
+      "type": "boolean",
+      "default": true
+    },
+    "githubRepoResponseInfo": {
+      "type": "string",
+      "default": "{}"
+    },
+    "selectedInfoNames": {
+      "type": "array",
+      "default": ["name"]
+    }
+  },
+  "textdomain": "github-insights",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js"
 }
