@@ -1,7 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from 'react';
 import { useBlockProps, RichText, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, FormTokenField } from '@wordpress/components';
+import { PanelBody, FormTokenField, TextControl } from '@wordpress/components';
 
 import './editor.scss';
 
@@ -18,6 +18,8 @@ export default function Edit() {
 
 	const [repoInfoLists, setRepoInfoLists] = useState([]);
 	const [errorMessage, setErrorMessage] = useState('');
+	const [githubRepoUrl, setGithubRepoUrl] = useState('');
+	const [isValidGithubRepoUrl, setIsValidGithubRepoUrl] = useState(true);
 
 	const handleRepoListValue = (selectedListValues) => {
 
@@ -31,10 +33,33 @@ export default function Edit() {
 		setRepoInfoLists(selectedListValues);
 	}
 
+	// Check the github URL format
+	const validateGithubRepoUrl = (url) => {
+
+		const githubUrlPattern = /^https:\/\/github\.com\/[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
+		const isValidUrl = githubUrlPattern.test(url);
+		if (!isValidUrl) {
+			setIsValidGithubRepoUrl(false);
+			return;
+		}
+		setIsValidGithubRepoUrl(true)
+	};
+
 	return (
 		<div {...useBlockProps()}>
 			<InspectorControls>
 				<PanelBody title="GitHub Repo Settings">
+
+					<TextControl
+						label="Enter GitHub Repo URL"
+						value={githubRepoUrl}
+						onChange={(value) => setGithubRepoUrl(value)}
+						onBlur={() => validateGithubRepoUrl(githubRepoUrl)}
+					/>
+					{!isValidGithubRepoUrl && (
+						<p style={{ color: 'red', marginTop: '5px' }}>Invalid GitHub URL</p>
+					)}
+
 					<FormTokenField
 						label="Select Info Fields"
 						value={repoInfoLists}
@@ -47,7 +72,6 @@ export default function Edit() {
 					)}
 				</PanelBody>
 			</InspectorControls>
-
 			<RichText
 				tagName="p"
 				// value={attributes.heading}
