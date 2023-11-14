@@ -66,11 +66,29 @@ export default function Edit({ attributes, setAttributes }) {
 			}
 
 			const repoInfo = await response.json();
+
+			// Create a new object with "user_" prefix for all keys in the owner object
+			const modifiedOwnerInfo = {};
+			for (const key in repoInfo.owner) {
+				modifiedOwnerInfo[`user_${key}`] = repoInfo.owner[key];
+			}
+
+			// Create a new object by spreading the existing repoInfo and adding the modifiedOwnerInfo
+			const modifiedRepoInfo = {
+				...repoInfo,
+				...modifiedOwnerInfo,
+			};
+
+			// Remove the owner key from the object
+			delete modifiedRepoInfo.owner;
+
+			console.log('Update repository information', modifiedRepoInfo)
+
 			setAttributes(
 				{
 					githubRepoUrl: url,
 					isValidGithubUrl: isValidGithubRepoUrl,
-					githubRepoResponseInfo: JSON.stringify(repoInfo)
+					githubRepoResponseInfo: JSON.stringify(modifiedRepoInfo)
 				});
 
 		} catch (error) {
