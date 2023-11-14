@@ -20,7 +20,7 @@ export default function Edit() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const [githubRepoUrl, setGithubRepoUrl] = useState('');
 	const [isValidGithubRepoUrl, setIsValidGithubRepoUrl] = useState(true);
-
+	const [githubRepoErrorMessage, setGithubRepoErrorMessage] = useState('');
 	const handleRepoListValue = (selectedListValues) => {
 
 		// Check if every selected value is present in the repoInfoField array
@@ -33,16 +33,38 @@ export default function Edit() {
 		setRepoInfoLists(selectedListValues);
 	}
 
-	// Check the github URL format
-	const validateGithubRepoUrl = (url) => {
+	// Check the github URL format and validate with github
+	const validateGithubRepoUrl = async (url) => {
+
+		setGithubRepoErrorMessage('')
 
 		const githubUrlPattern = /^https:\/\/github\.com\/[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
 		const isValidUrl = githubUrlPattern.test(url);
 		if (!isValidUrl) {
 			setIsValidGithubRepoUrl(false);
+			setGithubRepoErrorMessage('Invalid GitHub URL')
 			return;
 		}
+
 		setIsValidGithubRepoUrl(true)
+		try {
+			const response = await fetch(`https://api.github.com/repos${new URL(url).pathname}`);
+			if (!response.ok) {
+
+				setIsValidGithubRepoUrl(false);
+
+				// Repository does not exist or private
+				if (response.status === 404) {
+					setGithubRepoErrorMessage('Repository not found.')
+				} else {
+					setGithubRepoErrorMessage('An error occurred while fetching repository information.')
+				}
+				return;
+			}
+		} catch (error) {
+			setIsValidGithubRepoUrl(false);
+			setGithubRepoErrorMessage('Error validating GitHub URL')
+		}
 	};
 
 	return (
@@ -57,7 +79,7 @@ export default function Edit() {
 						onBlur={() => validateGithubRepoUrl(githubRepoUrl)}
 					/>
 					{!isValidGithubRepoUrl && (
-						<p style={{ color: 'red', marginTop: '5px' }}>Invalid GitHub URL</p>
+						<p style={{ color: 'red' }}>{githubRepoErrorMessage}</p>
 					)}
 
 					<FormTokenField
