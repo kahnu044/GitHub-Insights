@@ -27,7 +27,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const repoInfoField = ['name', 'watchers_count', 'language', 'forks', 'html_url', 'url'];
 function Edit({
   attributes,
   setAttributes
@@ -38,9 +37,10 @@ function Edit({
   const [isValidGithubRepoUrl, setIsValidGithubRepoUrl] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
   const [githubRepoErrorMessage, setGithubRepoErrorMessage] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('');
   const [matchedInfoValues, setMatchedInfoValues] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]);
+  const [repoSuggestionField, setRepoSuggestionField] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(attributes.githubRepoSuggestionsField || []);
   const handleRepoListValue = selectedListValues => {
-    // Check if every selected value is present in the repoInfoField array
-    const isValidSelection = selectedListValues.every(value => repoInfoField.includes(value));
+    // Check if every selected value is present in the repoSuggestionField array
+    const isValidSelection = selectedListValues.every(value => repoSuggestionField.includes(value));
     setErrorMessage('');
     if (!isValidSelection) {
       setErrorMessage('Invalid entry. Please select a valid info name.');
@@ -77,10 +77,29 @@ function Edit({
         return;
       }
       const repoInfo = await response.json();
+
+      // Create a new object with "user_" prefix for all keys in the owner object
+      const modifiedOwnerInfo = {};
+      for (const key in repoInfo.owner) {
+        modifiedOwnerInfo[`user_${key}`] = repoInfo.owner[key];
+      }
+
+      // Create a new object by spreading the existing repoInfo and adding the modifiedOwnerInfo
+      const modifiedRepoInfo = {
+        ...repoInfo,
+        ...modifiedOwnerInfo
+      };
+
+      // Remove the owner key from the object
+      delete modifiedRepoInfo.owner;
+
+      // Set the suggestion key name
+      setRepoSuggestionField(Object.keys(modifiedRepoInfo));
       setAttributes({
         githubRepoUrl: url,
         isValidGithubUrl: isValidGithubRepoUrl,
-        githubRepoResponseInfo: JSON.stringify(repoInfo)
+        githubRepoResponseInfo: JSON.stringify(modifiedRepoInfo),
+        githubRepoSuggestionsField: Object.keys(modifiedRepoInfo)
       });
     } catch (error) {
       setIsValidGithubRepoUrl(false);
@@ -119,7 +138,7 @@ function Edit({
   }, githubRepoErrorMessage), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.FormTokenField, {
     label: "Select Info Fields",
     value: repoInfoLists,
-    suggestions: repoInfoField,
+    suggestions: repoSuggestionField,
     onChange: listValues => handleRepoListValue(listValues),
     placeholder: "Select Fields Name"
   }), errorMessage && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
@@ -127,10 +146,23 @@ function Edit({
       color: 'red',
       marginTop: '5px'
     }
-  }, errorMessage))), matchedInfoValues && matchedInfoValues.map(({
+  }, errorMessage))), matchedInfoValues && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    style: {
+      padding: "10px"
+    }
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
+    tagName: "h4",
+    value: attributes.sectionHeading,
+    style: {
+      margin: 0
+    },
+    onChange: newValue => setAttributes({
+      sectionHeading: newValue
+    })
+  }), matchedInfoValues.map(({
     key,
     value
-  }) => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
+  }) => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
     key: key,
     tagName: "p",
     value: `${key} : ${value}`
@@ -313,7 +345,7 @@ module.exports = window["wp"]["i18n"];
   \************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/github-insights","version":"0.1.0","title":"Github Insights","category":"widgets","icon":"smiley","description":"Providing a streamlined way to showcase detailed statistics and insights for your GitHub repositories.","example":{},"supports":{"html":false},"attributes":{"githubRepoUrl":{"type":"string","default":""},"isValidGithubUrl":{"type":"boolean","default":true},"githubRepoResponseInfo":{"type":"string","default":"{}"},"selectedInfoNames":{"type":"array","default":["name"]}},"textdomain":"github-insights","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/github-insights","version":"0.1.0","title":"Github Insights","category":"widgets","icon":"smiley","description":"Providing a streamlined way to showcase detailed statistics and insights for your GitHub repositories.","example":{},"supports":{"html":false},"attributes":{"githubRepoUrl":{"type":"string","default":""},"isValidGithubUrl":{"type":"boolean","default":true},"githubRepoResponseInfo":{"type":"string","default":"{}"},"githubRepoSuggestionsField":{"type":"array","default":[]},"selectedInfoNames":{"type":"array","default":[]},"sectionHeading":{"type":"string","default":"GitHub Insights"}},"textdomain":"github-insights","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
 
 /***/ })
 

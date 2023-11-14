@@ -24,11 +24,17 @@
       "type": "string",
       "default": "{}"
     },
+    "githubRepoSuggestionsField": {
+      "type": "array",
+      "default": []
+    },
     "selectedInfoNames": {
       "type": "array",
-      "default": [
-        "name"
-      ]
+      "default": []
+    },
+    "sectionHeading": {
+      "type": "string",
+      "default": "GitHub Insights"
     }
   },
   "textdomain": "github-insights",
