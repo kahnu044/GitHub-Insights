@@ -61,7 +61,8 @@ export default function Edit({ attributes, setAttributes }) {
 					githubRepoUrl: url,
 					isValidGithubUrl: isValidGithubRepoUrl,
 					githubRepoResponseInfo: JSON.stringify(repoInfo),
-					githubRepoSuggestionsField: Object.keys(repoInfo)
+					githubRepoSuggestionsField: Object.keys(repoInfo),
+					lastUpdated: new Date().toISOString().split('T')[0]
 				});
 
 		} catch (error) {

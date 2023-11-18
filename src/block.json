@@ -34,6 +34,10 @@
     "sectionHeading": {
       "type": "string",
       "default": "GitHub Insights"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "default": ""
     }
   },
   "textdomain": "github-insights",
