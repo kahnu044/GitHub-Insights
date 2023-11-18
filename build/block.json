@@ -5,7 +5,6 @@
   "version": "0.1.0",
   "title": "Github Insights",
   "category": "widgets",
-  "icon": "smiley",
   "description": "Providing a streamlined way to showcase detailed statistics and insights for your GitHub repositories.",
   "example": {},
   "supports": {
