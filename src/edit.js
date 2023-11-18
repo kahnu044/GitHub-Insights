@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from 'react';
 import { useBlockProps, RichText, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, FormTokenField, TextControl } from '@wordpress/components';
+import { GITHUB_API_URL, fetchGitHubRepoInfo } from './blockUtils';
 import './editor.scss';
 
 export default function Edit({ attributes, setAttributes }) {
@@ -42,46 +43,25 @@ export default function Edit({ attributes, setAttributes }) {
 
 		setIsValidGithubRepoUrl(true)
 		try {
-			const response = await fetch(`https://api.github.com/repos${new URL(url).pathname}`);
-			if (!response.ok) {
 
-				setIsValidGithubRepoUrl(false);
+			const responseData = await fetchGitHubRepoInfo(url);
 
-				// Repository does not exist or private
-				if (response.status === 404) {
-					setGithubRepoErrorMessage('Repository not found.')
-				} else {
-					setGithubRepoErrorMessage('An error occurred while fetching repository information.')
-				}
+			if (!responseData.success) {
+				setGithubRepoErrorMessage(responseData.message);
 				return;
 			}
 
-			const repoInfo = await response.json();
-
-			// Create a new object with "user_" prefix for all keys in the owner object
-			const modifiedOwnerInfo = {};
-			for (const key in repoInfo.owner) {
-				modifiedOwnerInfo[`user_${key}`] = repoInfo.owner[key];
-			}
-
-			// Create a new object by spreading the existing repoInfo and adding the modifiedOwnerInfo
-			const modifiedRepoInfo = {
-				...repoInfo,
-				...modifiedOwnerInfo,
-			};
-
-			// Remove the owner key from the object
-			delete modifiedRepoInfo.owner;
+			const repoInfo = responseData.data;
 
 			// Set the suggestion key name
-			setRepoSuggestionField(Object.keys(modifiedRepoInfo));
+			setRepoSuggestionField(Object.keys(repoInfo));
 
 			setAttributes(
 				{
 					githubRepoUrl: url,
 					isValidGithubUrl: isValidGithubRepoUrl,
-					githubRepoResponseInfo: JSON.stringify(modifiedRepoInfo),
-					githubRepoSuggestionsField: Object.keys(modifiedRepoInfo)
+					githubRepoResponseInfo: JSON.stringify(repoInfo),
+					githubRepoSuggestionsField: Object.keys(repoInfo)
 				});
 
 		} catch (error) {
@@ -117,7 +97,7 @@ export default function Edit({ attributes, setAttributes }) {
 						onChange={(value) => setGithubRepoUrl(value)}
 						onBlur={() => validateGithubRepoUrl(githubRepoUrl)}
 					/>
-					{!isValidGithubRepoUrl && (
+					{githubRepoErrorMessage && (
 						<p style={{ color: 'red' }}>{githubRepoErrorMessage}</p>
 					)}
 
