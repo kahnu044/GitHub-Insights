@@ -1,9 +1,8 @@
 import { useBlockProps } from '@wordpress/block-editor';
 
-
 export default function save({ attributes }) {
 
-	const { githubRepoUrl, isValidGithubUrl, githubRepoResponseInfo, selectedInfoNames, sectionHeading } = attributes;
+	const { githubRepoUrl, isValidGithubUrl, githubRepoResponseInfo, selectedInfoNames, sectionHeading, lastUpdated } = attributes;
 
 	const repoInfo = JSON.parse(githubRepoResponseInfo);
 
@@ -22,6 +21,9 @@ export default function save({ attributes }) {
 						<li key={key}>{`${key}: ${value}`}</li>
 					))}
 				</ul>
+
+				<p>{`Last updated ${lastUpdated}`}</p>
+
 				{isValidGithubUrl ? (
 					<a href={githubRepoUrl}
 						style={{ color: "#e3d5d552", position: "absolute", right: "10px", bottom: "10px" }}
