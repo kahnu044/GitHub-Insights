@@ -240,27 +240,53 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__);
 
-/**
- * React hook that is used to mark the block wrapper element.
- * It provides all the necessary props like the class name.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
- */
 
+function save({
+  attributes
+}) {
+  const {
+    githubRepoUrl,
+    isValidGithubUrl,
+    githubRepoResponseInfo,
+    selectedInfoNames,
+    sectionHeading
+  } = attributes;
+  const repoInfo = JSON.parse(githubRepoResponseInfo);
 
-/**
- * The save function defines the way in which the different attributes should
- * be combined into the final markup, which is then serialized by the block
- * editor into `post_content`.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#save
- *
- * @return {Element} Element to render.
- */
-function save() {
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
-    ..._wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps.save()
-  }, 'Github Insights – hello from the saved content!');
+  // Filter out the selected info based on user preferences
+  const filteredInfo = selectedInfoNames.map(name => ({
+    key: name,
+    value: repoInfo[name]
+  }));
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    ..._wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps.save(),
+    style: {
+      position: "relative"
+    }
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h4", {
+    style: {
+      margin: 5
+    }
+  }, sectionHeading), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("ul", {
+    style: {
+      marginTop: 0
+    }
+  }, filteredInfo.map(({
+    key,
+    value
+  }) => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("li", {
+    key: key
+  }, `${key}: ${value}`))), isValidGithubUrl ? (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", {
+    href: githubRepoUrl,
+    style: {
+      color: "#e3d5d552",
+      position: "absolute",
+      right: "10px",
+      bottom: "10px"
+    },
+    target: "_blank",
+    rel: "noopener noreferrer"
+  }, "View on GitHub") : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, "Error: Invalid GitHub URL")));
 }
 
 /***/ }),
